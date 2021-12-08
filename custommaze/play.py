@@ -15,7 +15,11 @@ def iterate_2d_neighbors(x, y):
 
 
 class Maze:
-    def __init__(self, config):
+    def __init__(self, config, height=100, width=100, barrier_color = (255, 0, 0)):
+        self.height = height
+        self.width = width
+        self.barrier_color = barrier_color
+
         self.nbrows = config['nbrows']
         self.nbcols = config['nbcols']
         self.rowbarriers = config.get('rowbarriers', [[]])
@@ -33,6 +37,8 @@ class Maze:
                 logging.error('Invalid column barriers: ({},  {})'.format(x, y))
         if not valid:
             raise ValueError('Invalid barriers!')
+
+        self.screen = None
 
     def valid_next_boxes_iterator(self, rowid, colid):
         for x, y in iterate_2d_neighbors(rowid, colid):
@@ -61,29 +67,28 @@ class Maze:
     def valid_next_boxes(self, rowid, colid):
         return [[x, y] for x, y in self.valid_next_boxes_iterator(rowid, colid)]
 
+    def draw(self):
+        self.screen = pygame.display.set_mode((self.width * self.nbcols, self.height * self.nbrows))
+        for [rowbarrierx, rowbarriery] in self.rowbarriers:
+            pygame.draw.line(
+                self.screen,
+                self.barrier_color,
+                (rowbarrierx * self.width, (rowbarriery + 1) * self.height),
+                ((rowbarrierx + 1) * self.width, (rowbarriery + 1) * self.height)
+            )
+        for [colbarrierx, colbarriery] in maze.colbarriers:
+            pygame.draw.line(
+                self.screen,
+                self.barrier_color,
+                ((colbarrierx + 1) * self.width, colbarriery * self.height),
+                ((colbarrierx + 1) * self.width, (colbarriery + 1) * self.height)
+            )
 
+        # pygame.draw.line(screen, (0, 255, 0), (0, 1), (300, 400)) # for debug
+        pygame.display.flip()
 
-
-def draw_maze(maze, height=100, width=100):
-    barrier_color = (255, 0, 0)
-    screen = pygame.display.set_mode((width*maze.nbcols, height*maze.nbrows))
-    for [rowbarrierx, rowbarriery] in maze.rowbarriers:
-        pygame.draw.line(
-            screen,
-            barrier_color,
-            (rowbarrierx*width, (rowbarriery+1)*height),
-            ((rowbarrierx+1)*width, (rowbarriery+1)*height)
-        )
-    for [colbarrierx, colbarriery] in maze.colbarriers:
-        pygame.draw.line(
-            screen,
-            barrier_color,
-            ((colbarrierx+1)*width, colbarriery*height),
-            ((colbarrierx+1)*width, (colbarriery+1)*height)
-        )
-
-    # pygame.draw.line(screen, (0, 255, 0), (0, 1), (300, 400)) # for debug
-    pygame.display.flip()
+    def get_box_coordinates(self, mouse_x, mouse_y):
+        return (mouse_x // self.height), (mouse_y // self.width)
 
 
 def get_argparser():
@@ -100,12 +105,18 @@ if __name__ == '__main__':
 
     pygame.init()
 
-    draw_maze(maze)
+    maze.draw()
     running = True
     while running:
         for event in pygame.event.get():
             print(event)
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.MOUSEBUTTONUP:
+                mouse_x, mouse_y = event.pos
+                box_x, boy_y = maze.get_box_coordinates(mouse_x, mouse_y)
+                print('{}, {}'.format(box_x, boy_y))
+                for neighbor_x, neighbor_y in maze.valid_next_boxes(box_x, boy_y):
+                    print('neighbor: {}, {}'.format(neighbor_x, neighbor_y))
 
     pygame.quit()
