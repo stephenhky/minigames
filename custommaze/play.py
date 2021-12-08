@@ -24,11 +24,11 @@ class Maze:
         # validate
         valid = True
         for [x, y] in self.rowbarriers:
-            if not (x < self.nbrows-1 and y < self.nbcols):
+            if not (x < self.nbcols and y < self.nbrows-1):
                 valid = False
                 logging.error('Invalid row barriers: ({},  {})'.format(x, y))
         for [x, y] in self.colbarriers:
-            if not (x < self.nbrows and y < self.nbcols-1):
+            if not (x < self.nbcols-1 and y < self.nbrows):
                 valid = False
                 logging.error('Invalid column barriers: ({},  {})'.format(x, y))
         if not valid:
@@ -36,7 +36,7 @@ class Maze:
 
     def valid_next_boxes_iterator(self, rowid, colid):
         for x, y in iterate_2d_neighbors(rowid, colid):
-            if x >= 0 and x < self.nbrows and y >= 0 and y < self.nbcols:
+            if x >= 0 and x < self.nbcols and y >= 0 and y < self.nbrows:
                 if y == colid:
                     if x - rowid == 1:
                         if not [rowid, colid] in self.rowbarriers:
@@ -66,7 +66,7 @@ class Maze:
 
 def draw_maze(maze, height=100, width=100):
     barrier_color = (255, 0, 0)
-    screen = pygame.display.set_mode((width*maze.nbrows, height*maze.nbcols))
+    screen = pygame.display.set_mode((width*maze.nbcols, height*maze.nbrows))
     for [rowbarrierx, rowbarriery] in maze.rowbarriers:
         pygame.draw.line(
             screen,
@@ -81,6 +81,8 @@ def draw_maze(maze, height=100, width=100):
             ((colbarrierx+1)*width, colbarriery*height),
             ((colbarrierx+1)*width, (colbarriery+1)*height)
         )
+
+    # pygame.draw.line(screen, (0, 255, 0), (0, 1), (300, 400)) # for debug
     pygame.display.flip()
 
 
