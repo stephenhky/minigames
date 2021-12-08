@@ -1,6 +1,7 @@
 
 import json
 import logging
+from argparse import ArgumentParser
 
 import numpy as np
 import pygame
@@ -22,16 +23,14 @@ class Maze:
 
         # validate
         valid = True
-        if not (np.all(self.rowbarriers[:, 0] < self.nbrows-1) or np.all(self.rowbarriers[:, 1] < self.nbcols)):
-            for rowx, rowy in self.rowbarriers:
-                if rowx < self.nbrows-1 and rowy < self.nbcols:
-                    valid = False
-                    logging.error('Invalid row barriers: ({},  {})'.format(rowx, rowy))
-        if not (np.all(self.colbarriers[:, 0] < self.nbrows) or np.all(self.colbarriers[:, 1] < self.nbcols-1)):
-            for colx, coly in self.colbarriers:
-                if colx < self.nbrows-1 and coly < self.nbcols:
-                    valid = False
-                    logging.error('Invalid row barriers: ({},  {})'.format(colx, coly))
+        for [x, y] in self.rowbarriers:
+            if not (x < self.nbrows-1 and y < self.nbcols):
+                valid = False
+                logging.error('Invalid row barriers: ({},  {})'.format(x, y))
+        for [x, y] in self.colbarriers:
+            if not (x < self.nbrows and y < self.nbcols-1):
+                valid = False
+                logging.error('Invalid column barriers: ({},  {})'.format(x, y))
         if not valid:
             raise ValueError('Invalid barriers!')
 
@@ -65,5 +64,46 @@ class Maze:
 
 
 
-def draw_maze(maze):
-    pass
+def draw_maze(maze, height=100, width=100):
+    barrier_color = (255, 0, 0)
+    screen = pygame.display.set_mode((width*maze.nbrows, height*maze.nbcols))
+    for [rowbarrierx, rowbarriery] in maze.rowbarriers:
+        pygame.draw.line(
+            screen,
+            barrier_color,
+            (rowbarrierx*width, (rowbarriery+1)*height),
+            ((rowbarrierx+1)*width, (rowbarriery+1)*height)
+        )
+    for [colbarrierx, colbarriery] in maze.colbarriers:
+        pygame.draw.line(
+            screen,
+            barrier_color,
+            ((colbarrierx+1)*width, colbarriery*height),
+            ((colbarrierx+1)*width, (colbarriery+1)*height)
+        )
+    pygame.display.flip()
+
+
+def get_argparser():
+    argparser = ArgumentParser(description='Draw maze')
+    argparser.add_argument('mazejson', help='path of maze configuration JSON file')
+    return argparser
+
+
+if __name__ == '__main__':
+    args = get_argparser().parse_args()
+    maze_config = json.load(open(args.mazejson, 'r'))
+
+    maze = Maze(maze_config)
+
+    pygame.init()
+
+    draw_maze(maze)
+    running = True
+    while running:
+        for event in pygame.event.get():
+            print(event)
+            if event.type == pygame.QUIT:
+                running = False
+
+    pygame.quit()
