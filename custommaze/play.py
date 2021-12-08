@@ -6,12 +6,19 @@ import numpy as np
 import pygame
 
 
+def iterate_2d_neighbors(x, y):
+    yield x-1, y
+    yield x, y-1
+    yield x+1, y
+    yield x, y+1
+
+
 class Maze:
     def __init__(self, config):
         self.nbrows = config['nbrows']
         self.nbcols = config['nbcols']
-        self.rowbarriers = np.array(config.get('rowbarriers', [[]]))
-        self.colbarriers = np.array(config.get('colbarriers', [[]]))
+        self.rowbarriers = config.get('rowbarriers', [[]])
+        self.colbarriers = config.get('colbarriers', [[]])
 
         # validate
         valid = True
@@ -28,8 +35,34 @@ class Maze:
         if not valid:
             raise ValueError('Invalid barriers!')
 
-    def valid_next_box(self, rowid, colid):
-        pass
+    def valid_next_boxes_iterator(self, rowid, colid):
+        for x, y in iterate_2d_neighbors(rowid, colid):
+            if x >= 0 and x < self.nbrows and y >= 0 and y < self.nbcols:
+                if y == colid:
+                    if x - rowid == 1:
+                        if not [rowid, colid] in self.rowbarriers:
+                            yield x, y
+                    elif x - rowid == -1:
+                        if not [rowid-1, colid] in self.rowbarriers:
+                            yield x, y
+                    else:
+                        logging.warning('Not reachable!')
+                elif x == rowid:
+                    if y - colid == 1:
+                        if not [rowid, colid] in self.colbarriers:
+                            yield x, y
+                    elif y - colid == -1:
+                        if not [rowid, colid-1] in self.colbarriers:
+                            yield x, y
+                    else:
+                        logging.warning('Not reachable!')
+                else:
+                    logging.warning('Not reachanle!')
+
+    def valid_next_boxes(self, rowid, colid):
+        return [[x, y] for x, y in self.valid_next_boxes_iterator(rowid, colid)]
+
+
 
 
 def draw_maze(maze):
