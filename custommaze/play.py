@@ -39,19 +39,19 @@ class Maze:
             if x >= 0 and x < self.nbcols and y >= 0 and y < self.nbrows:
                 if y == colid:
                     if x - rowid == 1:
-                        if not [rowid, colid] in self.rowbarriers:
+                        if not [rowid, colid] in self.colbarriers:
                             yield x, y
                     elif x - rowid == -1:
-                        if not [rowid-1, colid] in self.rowbarriers:
+                        if not [rowid-1, colid] in self.colbarriers:
                             yield x, y
                     else:
                         logging.warning('Not reachable!')
                 elif x == rowid:
                     if y - colid == 1:
-                        if not [rowid, colid] in self.colbarriers:
+                        if not [rowid, colid] in self.rowbarriers:
                             yield x, y
                     elif y - colid == -1:
-                        if not [rowid, colid-1] in self.colbarriers:
+                        if not [rowid, colid-1] in self.rowbarriers:
                             yield x, y
                     else:
                         logging.warning('Not reachable!')
