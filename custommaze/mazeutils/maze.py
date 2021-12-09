@@ -64,6 +64,9 @@ class Maze:
     def valid_next_boxes(self, rowid, colid):
         return [[x, y] for x, y in self.valid_next_boxes_iterator(rowid, colid)]
 
+    def compute_box_screenpos(self, rowid, colid):
+        return (2*rowid+1)*self.width // 2, (2*colid+1)*self.height // 2
+
     def draw(self):
         self.screen = pygame.display.set_mode((self.width * self.nbcols, self.height * self.nbrows))
         for [rowbarrierx, rowbarriery] in self.rowbarriers:
