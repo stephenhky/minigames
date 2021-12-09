@@ -89,3 +89,21 @@ class Maze:
 
     def get_box_coordinates(self, mouse_x, mouse_y):
         return (mouse_x // self.height), (mouse_y // self.width)
+
+
+class ChessObject:
+    def __init__(self, imgfilepath, maze):
+        self.maze = maze
+        img = pygame.image.load(imgfilepath)
+        img = pygame.transform.scale(img, (int(maze.width*0.9), int(maze.height*0.9)))
+        img.convert()
+        self.img = img
+
+    def move_to(self, box_x, boy_y):
+        rect = self.img.get_rect()
+        self.maze.screen.blit(self.img, rect)
+        screen_x, screen_y = self.maze.compute_box_screenpos(box_x, boy_y)
+        rect.center = screen_x, screen_y
+        pygame.draw.rect(self.maze.screen, (0, 0, 0), rect, 1)
+        pygame.display.update()
+
