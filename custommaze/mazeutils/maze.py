@@ -98,12 +98,27 @@ class ChessObject:
         img = pygame.transform.scale(img, (int(maze.width*0.9), int(maze.height*0.9)))
         img.convert()
         self.img = img
+        self.rect = self.img.get_rect()
+        self.loc = None
 
-    def move_to(self, box_x, boy_y):
-        rect = self.img.get_rect()
-        self.maze.screen.blit(self.img, rect)
-        screen_x, screen_y = self.maze.compute_box_screenpos(box_x, boy_y)
-        rect.center = screen_x, screen_y
-        pygame.draw.rect(self.maze.screen, (0, 0, 0), rect, 1)
-        pygame.display.update()
-
+    def move_to(self, box_x, box_y):
+        screen_x, screen_y = self.maze.compute_box_screenpos(box_x, box_y)
+        if self.loc is None:
+            self.maze.screen.blit(self.img, self.rect)
+            self.rect.center = screen_x, screen_y
+            pygame.draw.rect(self.maze.screen, (0, 0, 0), self.rect, 1)
+            pygame.display.update()
+            self.loc = box_x, box_y
+            print("entry loc"+str(self.loc))
+        else:
+            old_screen_x, old_screen_y = self.maze.compute_box_screenpos(self.loc[0], self.loc[1])
+            screen_x, screen_y = self.maze.compute_box_screenpos(box_x, box_y)
+            dx, dy = screen_x-old_screen_x, screen_y-old_screen_y
+            print((dx, dy))
+            self.maze.screen.blit(self.img, self.rect)
+            self.rect.move_ip(dx, dy)
+            # self.rect.move_ip(screen_x, screen_y)
+            # pygame.draw.rect(self.maze.screen, (0, 0, 0), self.rect, 1)
+            pygame.display.update(self.rect)
+            self.loc = box_x, box_y
+            print(self.loc)
