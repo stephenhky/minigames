@@ -20,14 +20,6 @@ def play_game(maze_config):
     # drawing image
     doraemon = ChessObject('doraemon.jpeg', maze)
     doraemon.move_to(0, 0)
-    # doraemon = pygame.image.load('doraemon.jpeg')
-    # doraemon = pygame.transform.scale(doraemon, (int(maze.width*0.9), int(maze.height*0.9)))
-    # doraemon.convert()
-    # rect = doraemon.get_rect()
-    # maze.screen.blit(doraemon, rect)
-    # rect.center = maze.width // 2, maze.height // 2
-    # pygame.draw.rect(maze.screen, (0, 0, 0), rect, 1)
-    # pygame.display.update()
 
     running = True
     while running:

@@ -102,6 +102,8 @@ class ChessObject:
         self.loc = None
 
     def move_to(self, box_x, box_y):
+        self.maze.screen.fill((0, 0, 0))
+        self.maze.draw()
         screen_x, screen_y = self.maze.compute_box_screenpos(box_x, box_y)
         if self.loc is None:
             self.maze.screen.blit(self.img, self.rect)
@@ -114,11 +116,8 @@ class ChessObject:
             old_screen_x, old_screen_y = self.maze.compute_box_screenpos(self.loc[0], self.loc[1])
             screen_x, screen_y = self.maze.compute_box_screenpos(box_x, box_y)
             dx, dy = screen_x-old_screen_x, screen_y-old_screen_y
-            print((dx, dy))
-            self.maze.screen.blit(self.img, self.rect)
             self.rect.move_ip(dx, dy)
-            # self.rect.move_ip(screen_x, screen_y)
-            # pygame.draw.rect(self.maze.screen, (0, 0, 0), self.rect, 1)
-            pygame.display.update(self.rect)
+            self.maze.screen.blit(self.img, self.rect)
+            pygame.display.flip()
             self.loc = box_x, box_y
             print(self.loc)
