@@ -18,12 +18,12 @@ def play_game(maze_config):
     maze.draw()
 
     # initial_weights
-    P = initialize_probabilities_from_maze(maze, weight_initialization='uniform')
+    P = initialize_probabilities_from_maze(maze)
     for x, y in product(range(maze.nbcols), range(maze.nbrows)):
         for direction in P[(x, y)]:
-            if P[(x, y)][direction]['state'] == (maze.nbcols - 1, maze.nbrows - 1):
-                P[(x, y)][direction]['terminal'] = True
-                P[(x, y)][direction]['reward'] = 1.0
+            if P[(x, y)][direction][0]['state'] == (maze.nbcols - 1, maze.nbrows - 1):
+                P[(x, y)][direction][0]['terminal'] = True
+                P[(x, y)][direction][0]['reward'] = 1.0
     print(P)
 
     # drawing image
