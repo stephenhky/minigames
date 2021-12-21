@@ -1,6 +1,9 @@
 
 import logging
+import enum
+from itertools import product
 
+import numpy as np
 import pygame
 
 
@@ -11,8 +14,36 @@ def iterate_2d_neighbors(x, y):
     yield x, y+1
 
 
+class Direction(enum.Enum):
+    LEFT = 0
+    RIGHT = 1
+    UP = 2
+    DOWN = 3
+    NODIRECTION = -1
+    UNDEFINED = -2
+
+
+def get_direction(prev_row, prev_col, next_row, next_col):
+    if prev_col == next_col:
+        if next_row > prev_row:
+            return Direction.RIGHT
+        elif next_row < prev_row:
+            return Direction.LEFT
+        else:
+            return Direction.NODIRECTION
+    elif prev_row == next_row:
+        if next_col > prev_col:
+            return Direction.DOWN
+        elif next_col < prev_col:
+            return Direction.UP
+        else:
+            return Direction.NODIRECTION
+    else:
+        return Direction.UNDEFINED
+
+
 class Maze:
-    def __init__(self, config, height=100, width=100, barrier_color = (255, 0, 0)):
+    def __init__(self, config, height=100, width=100, barrier_color=(255, 0, 0)):
         self.height = height
         self.width = width
         self.barrier_color = barrier_color
@@ -120,4 +151,29 @@ class ChessObject:
             self.maze.screen.blit(self.img, self.rect)
             pygame.display.flip()
             self.loc = box_x, box_y
-            print(self.loc)
+            print("entry loc"+str(self.loc))
+
+
+def initialize_probabilities_from_maze(maze, weight_initialization='random'):
+    states = [
+        (row, col)
+        for row, col in product(range(maze.nbrows), range(maze.nbcols))
+    ]
+    P = {}
+    for row, col in states:
+        P[(row, col)] = {}
+        for nextrow, nextcol in maze.valid_next_boxes_iterator(row, col):
+            direction = get_direction(row, col, nextrow, nextcol)
+            P[(row, col)][direction] = {'state': (nextrow, nextcol)}
+        nbnextstates = len(P[(row, col)])
+        if weight_initialization == 'uniform':
+            initial_weights = np.repeat(1./nbnextstates, nbnextstates)
+        elif weight_initialization == 'random':
+            initial_weights = np.random.uniform(size=nbnextstates)
+            initial_weights /= np.sum(initial_weights)
+        else:
+            raise ValueError('weight_initialization must be "random" or "uniform", not {}'.format(weight_initialization))
+        for direction, weight in zip(P[(row, col)].keys(), initial_weights):
+            P[(row, col)][direction]['probability'] = weight
+    return P
+
