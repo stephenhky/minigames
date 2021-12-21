@@ -156,16 +156,16 @@ class ChessObject:
 
 def initialize_probabilities_from_maze(maze, weight_initialization='random'):
     states = [
-        (row, col)
-        for row, col in product(range(maze.nbrows), range(maze.nbcols))
+        (x, y)
+        for x, y in product(range(maze.nbcols), range(maze.nbrows))
     ]
     P = {}
-    for row, col in states:
-        P[(row, col)] = {}
-        for nextrow, nextcol in maze.valid_next_boxes_iterator(row, col):
-            direction = get_direction(row, col, nextrow, nextcol)
-            P[(row, col)][direction] = {'state': (nextrow, nextcol)}
-        nbnextstates = len(P[(row, col)])
+    for x, y in states:
+        P[(x, y)] = {}
+        for newx, newy in maze.valid_next_boxes_iterator(x, y):
+            direction = get_direction(x, y, newx, newy)
+            P[(x, y)][direction] = {'state': (newx, newy)}
+        nbnextstates = len(P[(x, y)])
         if weight_initialization == 'uniform':
             initial_weights = np.repeat(1./nbnextstates, nbnextstates)
         elif weight_initialization == 'random':
@@ -173,7 +173,9 @@ def initialize_probabilities_from_maze(maze, weight_initialization='random'):
             initial_weights /= np.sum(initial_weights)
         else:
             raise ValueError('weight_initialization must be "random" or "uniform", not {}'.format(weight_initialization))
-        for direction, weight in zip(P[(row, col)].keys(), initial_weights):
-            P[(row, col)][direction]['probability'] = weight
+        for direction, weight in zip(P[(x, y)].keys(), initial_weights):
+            P[(x, y)][direction]['probability'] = weight
+            P[(x, y)][direction]['reward'] = 0.
+            P[(x, y)][direction]['terminal'] = False
     return P
 

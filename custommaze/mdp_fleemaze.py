@@ -2,6 +2,7 @@
 import json
 import logging
 from argparse import ArgumentParser
+from itertools import product
 
 import pygame
 
@@ -18,6 +19,11 @@ def play_game(maze_config):
 
     # initial_weights
     P = initialize_probabilities_from_maze(maze, weight_initialization='uniform')
+    for x, y in product(range(maze.nbcols), range(maze.nbrows)):
+        for direction in P[(x, y)]:
+            if P[(x, y)][direction]['state'] == (maze.nbcols - 1, maze.nbrows - 1):
+                P[(x, y)][direction]['terminal'] = True
+                P[(x, y)][direction]['reward'] = 1.0
     print(P)
 
     # drawing image
