@@ -2,6 +2,7 @@
 import logging
 import enum
 from itertools import product
+from collections import OrderedDict
 
 import numpy as np
 import pygame
@@ -159,7 +160,7 @@ def initialize_probabilities_from_maze(maze):
         (x, y)
         for x, y in product(range(maze.nbcols), range(maze.nbrows))
     ]
-    P = {}
+    P = OrderedDict()
     for x, y in states:
         P[(x, y)] = {}
         for newx, newy in maze.valid_next_boxes_iterator(x, y):
