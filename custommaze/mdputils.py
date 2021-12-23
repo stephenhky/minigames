@@ -22,13 +22,22 @@ def make_state_action_dicts(P):
     stateindexdict = make_dict_to_indices(P.keys())
     actions = set([action for pos in P for action in P[pos]])
     actionindexdict = make_dict_to_indices(actions)
-    return stateindexdict, actionindexdict, actions
+    return stateindexdict, actionindexdict
+
+
+def make_enumerated_list(indexdict):
+    items = [None]*len(indexdict)
+    for key, value in indexdict.items():
+        if value >= len(indexdict):
+            raise ValueError('Not a valid enumerated indexdict!')
+        items[value] = key
+    return items
 
 
 def policy_evaluation(pi, P, gamma=1.0, epsilon=1e-10, stateindexdict=None):
     # dictionary from pos to index i
     if stateindexdict is None:
-        stateindexdict, _, _ = make_state_action_dicts(P)
+        stateindexdict, _ = make_state_action_dicts(P)
 
     # looping
     prev_V = np.zeros(len(stateindexdict.keys()))
@@ -36,7 +45,7 @@ def policy_evaluation(pi, P, gamma=1.0, epsilon=1e-10, stateindexdict=None):
         V = np.zeros(len(stateindexdict.keys()))
         for state in stateindexdict.keys():
             i = stateindexdict[state]
-            action = pi[state]
+            action = pi(state)
             if action in P[state]:
                 for policy_element in P[state][action]:
                     newstate = policy_element['state']
@@ -57,15 +66,14 @@ def policy_evaluation(pi, P, gamma=1.0, epsilon=1e-10, stateindexdict=None):
 def policy_improvement(V, P, gamma=1.0, stateindexdict=None, actionindexdict=None):
     # dictionaries
     if stateindexdict is None or actionindexdict is None:
-        stateindexdict. actionindexdict, actions = make_state_action_dicts(P)
-    else:
-        actions = set(actionindexdict.keys())
+        stateindexdict. actionindexdict = make_state_action_dicts(P)
+    actions = make_enumerated_list(actionindexdict)
 
     # looping
     Q = np.zeros((len(stateindexdict.keys()), len(actions)))
     for state in stateindexdict.keys():
         i = stateindexdict[state]
-        for action in actionindexdict.keys():
+        for action in P[state].keys():
             j = actionindexdict[action]
             for policy_element in P[state][action]:
                 newstate = policy_element['state']
@@ -87,8 +95,7 @@ def policy_iteration(P, gamma=1.0, epsilon=1e-10, stateindexdict=None, actionind
     # dictionaries
     if stateindexdict is None or actionindexdict is None:
         stateindexdict. actionindexdict, actions = make_state_action_dicts(P)
-    else:
-        actions = set(actionindexdict.keys())
+    actions = make_enumerated_list(actionindexdict)
 
     # randomly initialize policy
     pi = convert_dict_to_function({
@@ -111,8 +118,7 @@ def value_iteration(P, gamma=1.0, epsilon=1e-10, stateindexdict=None, actioninde
     # dictionaries
     if stateindexdict is None or actionindexdict is None:
         stateindexdict. actionindexdict, actions = make_state_action_dicts(P)
-    else:
-        actions = set(actionindexdict.keys())
+    actions = make_enumerated_list(actionindexdict)
 
     # initialize value function
     V = np.zeros(len(P))
@@ -122,7 +128,7 @@ def value_iteration(P, gamma=1.0, epsilon=1e-10, stateindexdict=None, actioninde
         Q = np.zeros((len(stateindexdict.keys()), len(actions)))
         for state in stateindexdict.keys():
             i = stateindexdict[state]
-            for action in actionindexdict.keys():
+            for action in P[state].keys():
                 j = actionindexdict[action]
                 for policy_element in P[state][action]:
                     newstate = policy_element['state']

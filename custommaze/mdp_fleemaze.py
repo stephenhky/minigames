@@ -32,7 +32,7 @@ def play_game(maze_config, approach):
     doraemon.move_to(0, 0)
 
     # calculating value function
-    stateindexdict, actionindexdict, _ = make_state_action_dicts(P)
+    stateindexdict, actionindexdict = make_state_action_dicts(P)
     if approach == 'policy':
         V, pi = policy_iteration(P, stateindexdict=stateindexdict, actionindexdict=actionindexdict)
     elif approach == 'value':
