@@ -18,10 +18,17 @@ def convert_dict_to_function(dictionary):
     return partial(fcn, dict1=dictionary)
 
 
+def make_state_action_dicts(P):
+    stateindexdict = make_dict_to_indices(P.keys())
+    actions = set([action for pos in P for action in P[pos]])
+    actionindexdict = make_dict_to_indices(actions)
+    return stateindexdict, actionindexdict, actions
+
+
 def policy_evaluation(pi, P, gamma=1.0, epsilon=1e-10, stateindexdict=None):
     # dictionary from pos to index i
     if stateindexdict is None:
-        stateindexdict = make_dict_to_indices(P.keys())
+        stateindexdict, _, _ = make_state_action_dicts(P)
 
     # looping
     prev_V = np.zeros(len(stateindexdict.keys()))
@@ -48,13 +55,11 @@ def policy_evaluation(pi, P, gamma=1.0, epsilon=1e-10, stateindexdict=None):
 
 
 def policy_improvement(V, P, gamma=1.0, stateindexdict=None, actionindexdict=None):
-    # dictionary from pos to indeces
-    if stateindexdict is None:
-        stateindexdict = make_dict_to_indices(P.keys())
-    # dictionary from action to indices
-    actions = set([action for pos in P for action in P[pos]])
-    if actionindexdict is None:
-        actionindexdict = make_dict_to_indices(actions)
+    # dictionaries
+    if stateindexdict is None or actionindexdict is None:
+        stateindexdict. actionindexdict, actions = make_state_action_dicts(P)
+    else:
+        actions = set(actionindexdict.keys())
 
     # looping
     Q = np.zeros((len(stateindexdict.keys()), len(actions)))
@@ -79,13 +84,11 @@ def policy_improvement(V, P, gamma=1.0, stateindexdict=None, actionindexdict=Non
 
 
 def policy_iteration(P, gamma=1.0, epsilon=1e-10, stateindexdict=None, actionindexdict=None):
-    # dictionary from pos to indeces
-    if stateindexdict is None:
-        stateindexdict = make_dict_to_indices(P.keys())
-    # dictionary from action to indices
-    actions = set([action for pos in P for action in P[pos]])
-    if actionindexdict is None:
-        actionindexdict = make_dict_to_indices(actions)
+    # dictionaries
+    if stateindexdict is None or actionindexdict is None:
+        stateindexdict. actionindexdict, actions = make_state_action_dicts(P)
+    else:
+        actions = set(actionindexdict.keys())
 
     # randomly initialize policy
     pi = convert_dict_to_function({
@@ -105,13 +108,11 @@ def policy_iteration(P, gamma=1.0, epsilon=1e-10, stateindexdict=None, actionind
 
 
 def value_iteration(P, gamma=1.0, epsilon=1e-10, stateindexdict=None, actionindexdict=None):
-    # dictionary from pos to indeces
-    if stateindexdict is None:
-        stateindexdict = make_dict_to_indices(P.keys())
-    # dictionary from action to indices
-    actions = set([action for pos in P for action in P[pos]])
-    if actionindexdict is None:
-        actionindexdict = make_dict_to_indices(actions)
+    # dictionaries
+    if stateindexdict is None or actionindexdict is None:
+        stateindexdict. actionindexdict, actions = make_state_action_dicts(P)
+    else:
+        actions = set(actionindexdict.keys())
 
     # initialize value function
     V = np.zeros(len(P))
