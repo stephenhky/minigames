@@ -18,7 +18,7 @@ def convert_dict_to_function(dictionary):
     return partial(fcn, dict1=dictionary)
 
 
-def policy_evaluation(pi, P, gamma=1.0, epislon=1e-10, stateindexdict=None):
+def policy_evaluation(pi, P, gamma=1.0, epsilon=1e-10, stateindexdict=None):
     # dictionary from pos to index i
     if stateindexdict is None:
         stateindexdict = make_dict_to_indices(P.keys())
@@ -39,7 +39,7 @@ def policy_evaluation(pi, P, gamma=1.0, epislon=1e-10, stateindexdict=None):
                     done = policy_element['terminal']
                     V[i] += prob * (reward + gamma*prev_V[j]*(not done))
 
-        if np.max(np.abs(V - prev_V)) < epislon:
+        if np.max(np.abs(V - prev_V)) < epsilon:
             break
 
         prev_V = V.copy()
@@ -76,3 +76,29 @@ def policy_improvement(V, P, gamma=1.0, stateindexdict=None, actionindexdict=Non
         for state, i in stateindexdict.items()
     })
     return new_pi
+
+
+def policy_iteration(P, gamma=1.0, epsilon=1e-10, stateindexdict=None, actionindexdict=None):
+    # dictionary from pos to indeces
+    if stateindexdict is None:
+        stateindexdict = make_dict_to_indices(P.keys())
+    # dictionary from action to indices
+    actions = set([action for pos in P for action in P[pos]])
+    if actionindexdict is None:
+        actionindexdict = make_dict_to_indices(actions)
+
+    # randomly initialize policy
+    pi = convert_dict_to_function({
+        state: action
+        for state, action in zip(stateindexdict.keys(), np.random.choice(tuple(actions), len(stateindexdict)))
+    })
+
+    # looping
+    while True:
+        old_pi = {state: pi(state) for state in stateindexdict.keys()}
+        V = policy_evaluation(pi, P, gamma=gamma, epsilon=epsilon, stateindexdict=stateindexdict)
+        pi = policy_improvement(V, P, gamma=gamma, stateindexdict=stateindexdict, actionindexdict=actionindexdict)
+        if old_pi == {state: pi(state) for state in stateindexdict.keys()}:
+            break
+
+    return V, pi
