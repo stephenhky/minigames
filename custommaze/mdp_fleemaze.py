@@ -27,11 +27,12 @@ def play_game(maze_config, approach, gamma=0.75):
         for direction in P[(x, y)]:
             if P[(x, y)][direction][0]['state'] == (maze.nbcols - 1, maze.nbrows - 1):
                 P[(x, y)][direction][0]['terminal'] = True
-                P[(x, y)][direction][0]['reward'] = 5.0
+                P[(x, y)][direction][0]['reward'] = 100.0
             else:
-                newx, newy = P[(x, y)][direction][0]['state']
-                distance = euclidean(np.array([maze.nbrows-1, maze.nbcols-1]), np.array([newx, newy]))
-                P[(x, y)][direction][0]['reward'] = 1.0 - distance / maxdistance
+                # NOTE: This kind of distance reward will make Doraemon trapped in an infinite loop.
+                # newx, newy = P[(x, y)][direction][0]['state']
+                # distance = euclidean(np.array([maze.nbrows-1, maze.nbcols-1]), np.array([newx, newy]))
+                # P[(x, y)][direction][0]['reward'] = 1.0 - distance / maxdistance
                 pass
     print(P)
 
